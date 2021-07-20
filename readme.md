@@ -1,3 +1,16 @@
+### 目录结构
+
+```
+.
+├── master
+│   └── conf
+│       └── my.cnf
+├── readme.md
+└── slave
+    └── conf
+        └── my.cnf
+```
+
 ### 配置描述
 
 ```shell
@@ -39,16 +52,16 @@ mysql -u root -p -h 127.0.0.1 --port=3306 < ~/master_db.sql
 master配置
 
 ```mysql
-# 创建用于从服务器同步数据使用的帐号
+-- 创建用于从服务器同步数据使用的帐号
 grant replication slave on *.* to 'slave'@'%' identified by 'slave';
-# 刷新权限
+-- 刷新权限
 flush privileges;
-# 查看主机状态，并记录File和Position的值
+-- 查看主机状态，并记录File和Position的值
 show master status;
-"""
-File	Position	Binlog_Do_DB	Binlog_Ignore_DB	Executed_Gtid_Set
-mysql-bin.000003	520			
-"""
+-- """
+-- File	Position	Binlog_Do_DB	Binlog_Ignore_DB	Executed_Gtid_Set
+-- mysql-bin.000003	520			
+-- """
 ```
 
  <img src="https://gitee.com/zhouyuanmin/images/raw/master/imgs/20210720141844.png" alt="image-20210720141844193" style="zoom:50%;" />
@@ -56,27 +69,28 @@ mysql-bin.000003	520
 slave配置
 
 ```mysql
-# 从机连接主机
-CHANGE MASTER TO master_host = '127.0.0.1',
+-- 从机连接主机
+-- 在docker上，用127.0.0.1访问不到主机
+CHANGE MASTER TO master_host = '1.15.144.243',  
 master_user = 'slave',
 master_password = 'slave',
 master_log_file = 'mysql-bin.000003',
 master_log_pos = 520,
 master_port = 3307;
-"""
-master_host：主服务器Ubuntu的ip地址
-master_log_file: 前面查询到的主服务器日志文件名
-master_log_pos: 前面查询到的主服务器日志文件位置
-"""
-# 启动slave服务器，并查看同步状态
+-- """
+-- master_host：主服务器Ubuntu的ip地址
+-- master_log_file: 前面查询到的主服务器日志文件名
+-- master_log_pos: 前面查询到的主服务器日志文件位置
+-- """
+-- 启动slave服务器，并查看同步状态
 start slave;  -- stop slave;
 show slave status;
-"""
-检查
-Slave_IO_Running项是Yes
-Slave_SQL_Running项是Yes
-则没有问题
-"""
+-- """
+-- 检查
+-- Slave_IO_Running项是Yes
+-- Slave_SQL_Running项是Yes
+-- 则没有问题
+-- """
 ```
 
  
